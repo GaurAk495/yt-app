@@ -1,0 +1,22 @@
+{
+  "name": "backend",
+  "type": "module",
+  "private": true,
+  "main": "dist/server.js",
+
+  "scripts": {
+    "dev": "bun --watch src/server.ts",
+    "build": "bun build src/server.ts --outdir dist --target bun",
+    "start": "bun dist/server.js"
+  },
+
+  "devDependencies": {
+    "@types/bun": "latest",
+    "typescript": "^5.0.0"
+  },
+
+  "dependencies": {
+    "@socket.io/bun-engine": "^0.1.0",
+    "socket.io": "^4.8.3"
+  }
+}

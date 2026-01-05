@@ -1,0 +1,8 @@
+
+POST https://n8n.flowton.online/webhook/v2/subtitle_task
+Content-Type: application/json
+
+{
+"url": "https://youtu.be/x7ss69cr29E?si=fZLScl-i8C2QUcfd",
+"lang": "es"
+}
