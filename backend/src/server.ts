@@ -8,6 +8,6 @@ const engine = new Engine({
 initSocket(engine);
 
 export default {
-  port: 3000,
+  port: process.env.PORT || 3000,
   ...engine.handler(),
 };
