@@ -106,7 +106,7 @@ export const TranscriptView: React.FC<TranscriptViewProps> = ({ data }) => {
       </div>
 
       {/* Transcript List */}
-      <div className="bg-gray-800/30 border border-gray-700 rounded-2xl p-6 backdrop-blur-sm h-[600px]">
+      <div className="bg-gray-800/30 border border-gray-700 rounded-2xl p-6 backdrop-blur-sm h-150">
         {transcriptData.length > 0 ? (
           <Virtuoso
             style={{ height: "100%" }}

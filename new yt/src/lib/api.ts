@@ -1,4 +1,4 @@
-import type { Response } from "../types/ytsubtitle";
+import type { JobResponse } from "../types/ytsubtitle";
 
 type CreateJobResponse = {
   jobId: string;
@@ -36,15 +36,17 @@ export async function createJob(
   return response.json();
 }
 
-export async function getJobResult(videoId: string) {
-  try {
-    const response = await fetch(
-      N8N_WEBHOOK_URL.replace("v2", "2f40fe6c-3b9b-474e-94f0-74e88b7fafa7/v2") +
-        `/subtitle/${videoId}`
-    );
-    const data = (await response.json()) as Response;
-    return data;
-  } catch (error) {
-    console.error(error);
+export async function getJobResult(videoId: string): Promise<JobResponse> {
+  const response = await fetch(
+    N8N_WEBHOOK_URL.replace("v2", "2f40fe6c-3b9b-474e-94f0-74e88b7fafa7/v2") +
+      `/subtitle/${videoId}`
+  );
+
+  if (!response.ok) {
+    throw new Error("Error getting youtube transcript.");
   }
+
+  const json = await response.json();
+
+  return json.data; // 🔑 unwrap here
 }

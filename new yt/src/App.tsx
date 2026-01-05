@@ -8,8 +8,10 @@ import { FaBolt } from "react-icons/fa";
 import { connectWs } from "./lib/ws";
 import { AiOutlineCheck, AiOutlineLoading3Quarters } from "react-icons/ai";
 import Turnstile from "./lib/Turnstile";
+import { useQuery } from "@tanstack/react-query";
 
-export type JobStatus = "queue" | "started" | "completed";
+type JobStatus = "queue" | "started" | "completed";
+
 const steps: JobStatus[] = ["queue", "started", "completed"];
 export type OnProgressType = {
   jobId: string;
@@ -17,23 +19,43 @@ export type OnProgressType = {
   videoId: string;
 };
 
+function getVideoId(url: string) {
+  const regex =
+    /(?:youtube\.com\/(?:.*v=|v\/|embed\/|shorts\/)|youtu\.be\/)([a-zA-Z0-9_-]{11})/;
+
+  const match = url.match(regex);
+  return match ? match[1] : "";
+}
+
 function App() {
-  const [data, setData] = useState<JobResponse | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [jobId, setJobId] = useState<string | null>(null);
   const [status, setStatus] = useState<JobStatus | null>(null);
   const [token, setToken] = useState<string | null>(null);
+  const [videoId, setVideoId] = useState("");
+
+  const { data, refetch } = useQuery<JobResponse>({
+    queryKey: ["transcript", videoId],
+    queryFn: ({ queryKey }) => {
+      const [, vId] = queryKey as [string, string];
+      return getJobResult(vId);
+    },
+    staleTime: Infinity,
+    enabled: false,
+  });
   const handleUrlSubmit = async (url: string) => {
     setLoading(true);
     setError(null);
-    setData(null);
 
     try {
       if (!token) {
         alert("Verify you are human");
         return;
       }
+      const vId = getVideoId(url);
+      if (!vId) return setError("Provide valid youtube url.");
+      setVideoId(vId);
       setStatus("queue");
       const result = await createJob(url, token);
 
@@ -48,19 +70,15 @@ function App() {
       window.turnstile.reset();
     }
   };
+
   const onProgress = async (message: string) => {
-    const { status, videoId } = JSON.parse(message) as OnProgressType;
+    const { status } = JSON.parse(message) as OnProgressType;
     setStatus(status);
     if (status !== "completed") return;
-    const jobData = await getJobResult(videoId);
-    console.log(jobData);
-    if (!jobData) return;
-    const { success, data } = jobData;
-    if (success && data) {
-      setData(data);
-    }
+    refetch();
     setStatus(null);
   };
+
   useEffect(() => {
     if (!jobId) return;
     const socket = connectWs();
