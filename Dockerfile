@@ -1,15 +1,17 @@
-# BUILD STAGE
-FROM oven/bun:1 AS builder
+FROM oven/bun:1.3.5 AS builder
+
 WORKDIR /app
-COPY package.json bun.lockb* ./
+
+# 👇 backend folder copy karo
+COPY backend/package.json backend/bun.lockb* ./
 RUN bun install
-COPY . .
+
+COPY backend .
 RUN bun run build
 
-
-# RUN STAGE
-FROM oven/bun:1
+FROM oven/bun:1.3.5
 WORKDIR /app
+
 COPY --from=builder /app/dist ./dist
 COPY --from=builder /app/node_modules ./node_modules
 
